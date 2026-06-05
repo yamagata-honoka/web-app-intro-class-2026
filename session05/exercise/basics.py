@@ -30,5 +30,6 @@ def show_todos(todo_list):
     print(f'{status} {todo["id"]}: {todo["title"]}')
 
 
+
 # ヒント: 関数を呼び出して動作を確認する
 show_todos(todos)
