@@ -17,7 +17,7 @@
  */
 
 // サーバー側のAPIのアドレス（main.py の @app.get("/todos") などに対応）
-const API_URL = "/todos";
+const API_URL = "/losts";
 
 // ============================================================
 // TODO操作（CRUD）
@@ -26,7 +26,7 @@ const API_URL = "/todos";
 /**
  * TODO一覧を取得して表示する
  */
-async function loadTodos() {
+async function loadlosts() {
   // try ... catch: 通信中にエラーが起きても、アプリが止まらないようにする
   try {
     // サーバーに「一覧をください」とお願いし、返事(response)を待つ
@@ -40,8 +40,8 @@ async function loadTodos() {
     }
 
     // 返ってきたデータ(JSON)をJavaScriptの配列に変換する
-    const todos = await response.json();
-    renderTodos(todos); // 画面に描画する
+    const losts = await response.json();
+    renderlosts(losts); // 画面に描画する
   } catch (error) {
     // そもそもサーバーにつながらなかったときなど
     showError("通信エラーが発生しました");
@@ -58,7 +58,7 @@ async function addTodo() {
 
   // 送信前のチェック（バリデーション）: 空のときは送らずに注意を表示
   if (title === "") {
-    showError("TODOのタイトルを入力してください");
+    showError("持ち物の名前を入力してください");
     return;
   }
 
@@ -78,12 +78,12 @@ async function addTodo() {
 
     if (!response.ok) {
       const error = await response.json();
-      showError(error.detail || "TODOの追加に失敗しました");
+      showError(error.detail || "持ち物の追加に失敗しました");
       return;
     }
 
     input.value = ""; // 入力欄を空に戻す
-    await loadTodos(); // 一覧を取り直して、追加結果を画面に反映する
+    await loadlosts(); // 一覧を取り直して、追加結果を画面に反映する
   } catch (error) {
     showError("通信エラーが発生しました");
   }
@@ -99,7 +99,7 @@ async function toggleTodo(id, currentDone) {
     const response = await fetch(`${API_URL}/${id}`, {
       method: "PUT", // PUT = 既存のデータを更新する
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ done: !currentDone }), // !で完了/未完了を反転させる
+      body: JSON.stringify({ packed: !currentDone }), // !で完了/未完了を反転させる
     });
 
     if (!response.ok) {
@@ -108,7 +108,7 @@ async function toggleTodo(id, currentDone) {
       return;
     }
 
-    await loadTodos(); // 一覧を取り直して、更新結果を画面に反映する
+    await loadlosts(); // 一覧を取り直して、更新結果を画面に反映する
   } catch (error) {
     showError("通信エラーが発生しました");
   }
@@ -131,7 +131,7 @@ async function deleteTodo(id) {
       return;
     }
 
-    await loadTodos(); // 一覧を取り直して、削除結果を画面に反映する
+    await loadlosts(); // 一覧を取り直して、削除結果を画面に反映する
   } catch (error) {
     showError("通信エラーが発生しました");
   }
@@ -151,15 +151,15 @@ async function deleteTodo(id) {
  *  実行されてしまう危険がある（XSS）。そこで textContent を使い、
  *  入力を「ただの文字」として扱うことで、この攻撃を防いでいる。
  */
-function renderTodos(todos) {
+function renderlosts(losts) {
   const list = document.getElementById("todo-list");
   list.innerHTML = ""; // 古い表示を一度すべて消してから描き直す
 
   // todos配列の1件ずつ(todo)について、リストの行を作る
-  todos.forEach((todo) => {
+  losts.forEach((lost) => {
     // <li> 完了済みなら "done" クラスを足して見た目を変える
     const li = document.createElement("li");
-    li.className = "todo-item" + (todo.done ? " done" : "");
+    li.className = "todo-item" + (lost.packed ? " packed" : "");
 
     // チェックボックスとタイトルをまとめる<label>
     const label = document.createElement("label");
@@ -169,14 +169,14 @@ function renderTodos(todos) {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "todo-checkbox";
-    checkbox.checked = todo.done; // いまの完了状態をチェックに反映
+    checkbox.checked = lost.packed; // いまの完了状態をチェックに反映
     // チェックが変わったら、完了状態を切り替える関数を呼ぶ
-    checkbox.addEventListener("change", () => toggleTodo(todo.id, todo.done));
+    checkbox.addEventListener("change", () => toggleTodo(lost.id, lost.packed));
 
     // TODOのタイトル文字。textContent で安全に入れる（XSS対策）
     const titleSpan = document.createElement("span");
     titleSpan.className = "todo-title";
-    titleSpan.textContent = todo.title;
+    titleSpan.textContent = lost.title;
 
     // label の中に [チェックボックス][タイトル] を入れる
     label.appendChild(checkbox);
@@ -186,7 +186,7 @@ function renderTodos(todos) {
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-button";
     deleteBtn.textContent = "削除";
-    deleteBtn.addEventListener("click", () => deleteTodo(todo.id));
+    deleteBtn.addEventListener("click", () => deleteTodo(lost.id));
 
     // <li> の中に [label][削除ボタン] を入れて、リストに追加する
     li.appendChild(label);
@@ -222,4 +222,4 @@ document.getElementById("todo-form").addEventListener("submit", function (e) {
 });
 
 // ページ読み込み時に、まずTODO一覧を取得して表示する（ここがスタート地点）
-loadTodos();
+loadlosts();
