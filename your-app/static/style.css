@@ -1,6 +1,7 @@
 /* ============================================
-   TODO App CSS - 第8回
-   第7回の正解ベース + エラーメッセージスタイル追加
+
+   TODO App CSS -第8回
+   第7の正解ベース + エラーメッセージスタイル追加
 
    CSSは「どの部分を(セレクタ)・どう見せるか(プロパティ)」を指定するもの。
    .header のように . で始まるのはHTMLの class="..." を狙う書き方。
@@ -28,8 +29,8 @@ body {
 
 /* --- ヘッダー --- */
 .header {
-  background-color: #2563eb; /* 青色の背景 */
-  color: white; /* 白い文字 */
+  background-color: #009dff; /* 青色の背景 */
+  color: black; /* 白い文字 */
   padding: 16px 24px; /* 内側の余白（上下16px / 左右24px） */
   text-align: center; /* 文字を中央ぞろえに */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 下にうっすら影をつける */
@@ -87,13 +88,13 @@ body {
 
 /* :focus = その要素を選択中（クリックや入力中）のときだけ適用 */
 .todo-input:focus {
-  border-color: #2563eb; /* 入力中は枠線を青くする */
+  border-color: #0379c3; /* 入力中は枠線を青くする */
 }
 
 /* 追加ボタン */
 .todo-button {
   padding: 12px 24px;
-  background-color: #2563eb;
+  background-color: #009dff;
   color: white;
   border: none; /* 枠線なし */
   border-radius: 8px;
@@ -106,10 +107,25 @@ body {
 
 /* :hover = マウスを乗せたときだけ適用 */
 .todo-button:hover {
-  background-color: #1d4ed8; /* 少し濃い青にして「押せる」感を出す */
+  background-color: #008de4; /* 少し濃い青にして「押せる」感を出す */
 }
 
 /* --- TODOリスト --- */
+
+.setumei {
+  font-size: 16px;
+  padding-bottom: 2px;
+  text-align: center
+}
+
+.syousai {
+  font-size: 12px;
+  font-weight: 500;
+  padding-bottom: 5px;
+  text-align: center
+  
+}
+
 .todo-list {
   list-style: none; /* <li>の先頭につく「・」を消す */
 }

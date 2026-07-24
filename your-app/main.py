@@ -42,7 +42,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS losts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
-            packed INTEGER DEFAULT 0
+            packed INTEGER DEFAULT 0,
+            scene TEXT DEFALUT 'シーン'
         )
     """)
     conn.commit()  # 変更を確定して保存する
@@ -58,6 +59,7 @@ class lostsCreate(BaseModel):
     # 新しいTODOを作るときに受け取るデータ
     # title は1文字以上100文字以下の文字列でなければならない
     title: str = Field(min_length=1, max_length=100)
+    scene: str = 'シーン'
 
 
 class lostsUpdate(BaseModel):
@@ -78,14 +80,14 @@ def get_losts():
     cursor = conn.cursor()
 
     # todos テーブルの全データを id 順に取り出す
-    cursor.execute("SELECT id, title, packed FROM losts ORDER BY id")
+    cursor.execute("SELECT id, title, packed,scene FROM losts ORDER BY id")
     losts = cursor.fetchall()  # 取り出した全行をリストで受け取る
 
     conn.close()  # 接続を閉じる
     # 1行は (id, title, done) の順のタプルなので、番号で取り出す。
     # 取り出したデータを、ブラウザに返しやすい辞書のリストに作り変える。
     return [
-        {"id": todo[0], "title": todo[1], "packed": bool(todo[2])}
+        {"id": todo[0], "title": todo[1], "packed": bool(todo[2]), "scene": todo[3]}
         for todo in losts
     ]
 
@@ -99,14 +101,14 @@ def create_todo(todo: lostsCreate):
     # 新しいTODOを1件追加する（done は 0=未完了で登録）
     # ? を使うことで、危険な文字列が混ざってもSQLが壊れない（SQLインジェクション対策）
     cursor.execute(
-        "INSERT INTO losts (title, packed) VALUES (?, 0)",
-        (todo.title,),
+        "INSERT INTO losts (title, packed,scene) VALUES (?, 0,?)",
+        (todo.title, todo.scene),
     )
     conn.commit()  # 追加を確定する
     todo_id = cursor.lastrowid  # たった今追加した行の id を取得する
 
     conn.close()
-    return {"id": todo_id, "title": todo.title, "packed": False}
+    return {"id": todo_id, "title": todo.title, "packed": False, "scene":todo.scene}
 
 # PUT /todos/5 のように、URLの {todo_id} の部分が引数 todo_id に入る
 @app.put("/losts/{todo_id}")
@@ -116,7 +118,7 @@ def update_todo(todo_id: int, todo: lostsUpdate):
     cursor = conn.cursor()
 
     # まず、その id のTODOが本当にあるか確認する
-    cursor.execute("SELECT title FROM losts WHERE id = ?", (todo_id,))
+    cursor.execute("SELECT title, scene FROM losts WHERE id = ?", (todo_id,))
     existing = cursor.fetchone()  # 1件だけ取り出す。無ければ None が返る
     if existing is None:
         conn.close()  # 見つからないときも接続は閉じてから終わる
@@ -132,7 +134,7 @@ def update_todo(todo_id: int, todo: lostsUpdate):
 
     conn.close()
     # existing は (title,) のタプルなので、先頭を取り出す
-    return {"id": todo_id, "title": existing[0], "packed": todo.packed}
+    return {"id": todo_id, "title": existing[0], "packed": todo.packed, "scene": existing[1]}
 
 @app.delete("/losts/{todo_id}")  # DELETE /todos/5 で id=5 のTODOを削除
 def delete_todo(todo_id: int):
