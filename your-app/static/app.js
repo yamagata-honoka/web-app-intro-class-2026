@@ -56,6 +56,8 @@ async function addTodo() {
   const input = document.getElementById("todo-input");
   const title = input.value.trim();
 
+  const sceneInput = document.getElementById("todo-scene");
+  const scene = sceneInput ? sceneInput.value.trim() : "";
   // 送信前のチェック（バリデーション）: 空のときは送らずに注意を表示
   if (title === "") {
     showError("持ち物の名前を入力してください");
@@ -73,7 +75,7 @@ async function addTodo() {
     const response = await fetch(API_URL, {
       method: "POST", // POST = 新しいデータを作る
       headers: { "Content-Type": "application/json" }, // 中身はJSON形式だと伝える
-      body: JSON.stringify({ title: title }), // データをJSON文字列にして送る
+      body: JSON.stringify({ title: title, scene: scene }), // データをJSON文字列にして送る
     });
 
     if (!response.ok) {
@@ -83,6 +85,7 @@ async function addTodo() {
     }
 
     input.value = ""; // 入力欄を空に戻す
+    if (sceneInput) sceneInput.value = "";
     await loadlosts(); // 一覧を取り直して、追加結果を画面に反映する
   } catch (error) {
     showError("通信エラーが発生しました");
@@ -178,8 +181,12 @@ function renderlosts(losts) {
     titleSpan.className = "todo-title";
     titleSpan.textContent = lost.title;
 
+    const sceneSpan = document.createElement("span");
+    sceneSpan.className = "todo-scene";
+    sceneSpan.textContent = lost.scene ? `[${lost.scene}] ` : "";
     // label の中に [チェックボックス][タイトル] を入れる
     label.appendChild(checkbox);
+    label.appendChild(sceneSpan);
     label.appendChild(titleSpan);
 
     // 削除ボタン。押されたら削除する関数を呼ぶ
