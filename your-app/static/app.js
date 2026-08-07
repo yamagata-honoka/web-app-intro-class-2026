@@ -186,8 +186,8 @@ function renderlosts(losts) {
     sceneSpan.textContent = lost.scene ? `[${lost.scene}] ` : "";
     // label の中に [チェックボックス][タイトル] を入れる
     label.appendChild(checkbox);
-    label.appendChild(sceneSpan);
     label.appendChild(titleSpan);
+    label.appendChild(sceneSpan);
 
     // 削除ボタン。押されたら削除する関数を呼ぶ
     const deleteBtn = document.createElement("button");

@@ -71,13 +71,26 @@ body {
 /* 入力欄と追加ボタンを横並びにする箱 */
 .input-area {
   display: flex; /* 子要素を横並びに */
+  flex-direction: column;
   gap: 8px; /* 子要素どうしのすき間 */
   margin-bottom: 24px;
 }
 
+.input-row{
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
+}
+
+#todo-input{
+  flex: 2;
+}
+#todo-scene{
+  flex: 1;
+}
 /* テキスト入力欄 */
-.todo-input {
-  flex: 1; /* 余った横幅をすべて使って広がる（ボタンの残り全部） */
+.todo-input {/* 余った横幅をすべて使って広がる（ボタンの残り全部） */
   padding: 12px 16px;
   border: 2px solid #d1d5db; /* グレーの枠線 */
   border-radius: 8px;
@@ -93,7 +106,9 @@ body {
 
 /* 追加ボタン */
 .todo-button {
-  padding: 12px 24px;
+  width: auto;
+  align-self: center;
+  padding: 10px 24px;
   background-color: #009dff;
   color: white;
   border: none; /* 枠線なし */
@@ -110,6 +125,17 @@ body {
   background-color: #008de4; /* 少し濃い青にして「押せる」感を出す */
 }
 
+.todo-scene{
+  display: inline-block;
+  background-color: #e0f2fe;
+  color: #0284c7;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-right: 6px;
+  white-space: nowrap;
+}
 /* --- TODOリスト --- */
 
 .setumei {
@@ -164,6 +190,7 @@ body {
 
 .todo-title {
   font-size: 16px;
+  font-weight: bold;
   line-height: 1.5; /* 行の高さ（文字サイズの1.5倍）。読みやすくする */
   word-break: break-word; /* 長い文字列を途中で折り返して、はみ出させない */
 }
