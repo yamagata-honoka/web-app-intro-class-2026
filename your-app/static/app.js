@@ -19,6 +19,8 @@
 // サーバー側のAPIのアドレス（main.py の @app.get("/todos") などに対応）
 const API_URL = "/losts";
 
+const historylosts = []; 
+
 // ============================================================
 // TODO操作（CRUD）
 // ============================================================
@@ -123,6 +125,15 @@ async function toggleTodo(id, currentDone) {
  */
 async function deleteTodo(id) {
   try {
+
+    const responseGet = await fetch(API_URL);
+    if (responseGet.ok) {
+      const losts = await responseGet.json();
+      const targetItem = losts.find((lost) => lost.id === id);
+      if (targetItem) {
+        historylosts.unshift(targetItem);
+      }
+    }
     // /todos/5 のようなアドレスに対して削除を依頼する
     const response = await fetch(`${API_URL}/${id}`, {
       method: "DELETE", // DELETE = データを削除する
@@ -135,6 +146,7 @@ async function deleteTodo(id) {
     }
 
     await loadlosts(); // 一覧を取り直して、削除結果を画面に反映する
+    renderHistory(); 
   } catch (error) {
     showError("通信エラーが発生しました");
   }
@@ -192,7 +204,7 @@ function renderlosts(losts) {
     // 削除ボタン。押されたら削除する関数を呼ぶ
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-button";
-    deleteBtn.textContent = "削除";
+    deleteBtn.textContent = "解除";
     deleteBtn.addEventListener("click", () => deleteTodo(lost.id));
 
     // <li> の中に [label][削除ボタン] を入れて、リストに追加する
@@ -202,6 +214,51 @@ function renderlosts(losts) {
     list.appendChild(li);
   });
 }
+
+
+/**
+* 履歴リスト
+*/
+function renderHistory() {
+  const historyList = document.getElementById("history-list");
+  if (!historyList) return;
+  historyList.innerHTML = "";
+
+  historylosts.forEach((item, index) => {
+    const li = document.createElement("li");
+    li.className = "history-item";
+
+    const titleSpan = document.createElement("span");
+    titleSpan.style.fontWeight = "bold";
+    titleSpan.textContent = item.title;
+
+    const sceneSpan = document.createElement("span");
+    sceneSpan.className = "todo-scene";
+    sceneSpan.textContent = item.scene ? ` [${item.scene}]` : "";
+
+    const textGroup = document.createElement("div");
+    textGroup.appendChild(titleSpan);
+    textGroup.appendChild(sceneSpan);
+
+    const statusSpan = document.createElement("span");
+    statusSpan.className = `history-status ${item.packed ? "done" : "active"}`;
+    statusSpan.textContent = item.packed ? "【完了して解除】" : "【未完了で解除】";
+
+    const restoreBtn = document.createElement("button");
+    restoreBtn.className = "delete-button";
+    restoreBtn.textContent = "元に戻す";
+    restoreBtn.style.marginLeft = "10px";
+    restoreBtn.addEventListener("click", () => restoreTodo(index));
+
+    const rightGroup = document.createElement("div");
+    rightGroup.appendChild(statusSpan);
+    rightGroup.appendChild(restoreBtn);
+    li.appendChild(textGroup);
+    li.appendChild(rightGroup);
+    historyList.appendChild(li);
+  });
+}
+ 
 
 // ============================================================
 // メッセージ表示
@@ -230,3 +287,30 @@ document.getElementById("todo-form").addEventListener("submit", function (e) {
 
 // ページ読み込み時に、まずTODO一覧を取得して表示する（ここがスタート地点）
 loadlosts();
+
+/**
+* 履歴から元のリストへ復元する
+*/
+async function restoreTodo(index) {
+ try {
+   // 履歴配列から対象のアイテムを取り出す
+   const item = historylosts[index];
+   if (!item) return;
+   // サーバーへPOSTしてメインリストに再登録
+   const response = await fetch(API_URL, {
+     method: "POST",
+     headers: { "Content-Type": "application/json" },
+     body: JSON.stringify({ title: item.title, scene: item.scene }),
+   });
+   if (!response.ok) {
+     showError("復元に失敗しました");
+     return;
+   }
+   // 履歴配列から削除して画面を更新
+   historylosts.splice(index, 1);
+   await loadlosts();
+   renderHistory();
+ } catch (error) {
+   showError("通信エラーが発生しました");
+ }
+}

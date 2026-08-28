@@ -43,9 +43,10 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             packed INTEGER DEFAULT 0,
-            scene TEXT DEFALUT 'シーン'
+            scene TEXT DEFAULT 'シーン'
         )
     """)
+    
     conn.commit()  # 変更を確定して保存する
     conn.close()  # 接続を閉じる
 
@@ -168,3 +169,39 @@ init_db()
 if __name__ == "__main__":
     # host="0.0.0.0" で外部からのアクセスも受け付ける。ポート8000で待ち受ける
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# --- 履歴操作用API ---
+@app.get("/history")
+def get_history():
+   """履歴一覧を取得する"""
+   conn = sqlite3.connect(DATABASE)
+   cursor = conn.cursor()
+   cursor.execute("SELECT id, title, packed, scene FROM history_losts ORDER BY id DESC")
+   rows = cursor.fetchall()
+   conn.close()
+   return [
+       {"id": row[0], "title": row[1], "packed": bool(row[2]), "scene": row[3]}
+       for row in rows
+   ]
+
+@app.delete("/losts/{lost_id}")
+def delete_lost(lost_id: int):
+   """持ち物をメインリストから削除し、履歴テーブルへ移動する"""
+   conn = sqlite3.connect(DATABASE)
+   cursor = conn.cursor()
+   # 1. 削除対象のデータを取得
+   cursor.execute("SELECT title, packed, scene FROM losts WHERE id = ?", (lost_id,))
+   item = cursor.fetchone()
+   if not item:
+       conn.close()
+       raise HTTPException(status_code=404, detail="指定された持ち物が見つかりません")
+   # 2. 履歴テーブルへ保存
+   cursor.execute(
+       "INSERT INTO history_losts (title, packed, scene) VALUES (?, ?, ?)",
+       (item[0], item[1], item[2])
+   )
+   # 3. メインテーブルから削除
+   cursor.execute("DELETE FROM losts WHERE id = ?", (lost_id,))
+   conn.commit()
+   conn.close()
+   return {"message": "履歴に移動しました"}

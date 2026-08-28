@@ -257,3 +257,52 @@ body {
     width: 100%; /* ボタンを横幅いっぱいにして押しやすく */
   }
 }
+
+/* --- 履歴エリア --- */
+
+.history-section {
+  margin-top: 30px;
+  padding-top: 16px;
+  border-top: 2px dashed #e5e7eb;
+}
+
+.history-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #4b5563;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.history-list {
+  list-style: none;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.history-status {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* 完了して解除した場合 */
+.history-status.done {
+  color: #16a34a;
+}
+
+/* 未完了のまま解除した場合 */
+.history-status.active {
+  color: #dc2626;
+}
+ 
